@@ -1,42 +1,63 @@
-import { useEffect, useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import StatusAPI from './statusAPI'
 
-function Exercicio2() {
+function ListaUsuarios() {
   const [usuarios, setUsuarios] = useState([])
-  const [carregando, setCarregando] = useState(true)
-  const [erro, setErro] = useState(null) 
+  const [carregando, setCarregando] = useState(false)
+  const [erro, setErro] = useState(null)
 
   useEffect(() => {
-    async function buscarUsuarios() {
-      try {
-       
-        const resposta = await fetch('https://jsonplaceholder.typicode.com/usuariosenterrado')
-        
-        if (!resposta.ok) {
-          throw new Error(`HTTP ${resposta.status}`)
-        }
+    const controller = new AbortController()
 
-        const dados = await resposta.json()
-        setUsuarios(dados.slice(0, 10))
-      } catch (error) {
-        setErro(error.message) 
+    async function carregarUsuarios() {
+      setCarregando(true)
+      setErro(null)
+
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 800))
+
+        
+
+        const dadosSimulados = [
+          { id: 1, name: "Leanne Graham" },
+          { id: 2, name: "Ervin Howell" },
+          { id: 3, name: "Clementine Bauch" },
+          { id: 4, name: "Patricia Lebsack" },
+          { id: 5, name: "Chelsey Dietrich" }
+        ]
+
+        
+
+        setUsuarios(dadosSimulados)
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          setErro(err.message)
+        }
       } finally {
-        setCarregando(false) 
+        setCarregando(false)
       }
     }
 
-    buscarUsuarios()
+    carregarUsuarios()
+
+    return () => controller.abort()
   }, [])
 
-  if (carregando) return <p>Carregando...</p>
-  if (erro) return <p>Erro: {erro}</p>
-
   return (
-    <ul>
-      {usuarios.map(usuario => (
-        <li key={usuario.id}>{usuario.name}</li>
-      ))}
-    </ul>
+    <>
+      <h1>Lista de Usuários — Exercício 5</h1>
+      
+      <StatusAPI carregando={carregando} erro={erro} quantidade={usuarios.length} />
+
+      {!carregando && !erro && usuarios.length > 0 && (
+        <ul>
+          {usuarios.map((usuario) => (
+            <li key={usuario.id}>{usuario.name}</li>
+          ))}
+        </ul>
+      )}
+    </>
   )
 }
 
-export default Exercicio2
+export default ListaUsuarios
