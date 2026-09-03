@@ -1,74 +1,42 @@
-import React, { useState, useEffect } from 'react';
-import StatusAPI from './statusAPI';
+import { useEffect, useState } from 'react'
 
-function ListaUsuarios() {
-  const [usuarios, setUsuarios] = useState([]);
-  const [carregando, setCarregando] = useState(false);
-  const [erro, setErro] = useState(null);
+function Exercicio2() {
+  const [usuarios, setUsuarios] = useState([])
+  const [carregando, setCarregando] = useState(true)
+  const [erro, setErro] = useState(null) // Novo estado para erro
 
   useEffect(() => {
-    const controller = new AbortController();
-    const { signal } = controller;
-
-    async function carregarUsuarios() {
-      setCarregando(true);
-      setErro(null);
-
+    async function buscarUsuarios() {
       try {
+        // URL alterada de propósito para testar o erro 404
+        const resposta = await fetch('https://jsonplaceholder.typicode.com/usuariosenterrado')
         
-        const resposta = await fetch('https://typicode.com', { signal });
-
         if (!resposta.ok) {
-          throw new Error(`HTTP ${resposta.status}`);
+          throw new Error(`HTTP ${resposta.status}`)
         }
 
-        const dados = await resposta.json();
-        
-        
-
-        setUsuarios(dados);
-      } catch (err) {
-        if (err.name !== 'AbortError') {
-          setErro(err.message);
-        }
+        const dados = await resposta.json()
+        setUsuarios(dados.slice(0, 10))
+      } catch (error) {
+        setErro(error.message) // Captura a mensagem de erro
       } finally {
-        setCarregando(false);
+        setCarregando(false) // Sempre desliga no finally
       }
     }
 
-    carregarUsuarios();
+    buscarUsuarios()
+  }, [])
 
-    return () => controller.abort();
-  }, []);
+  if (carregando) return <p>Carregando...</p>
+  if (erro) return <p>Erro: {erro}</p>
 
   return (
-    <div style={{ maxWidth: '500px', margin: '40px auto', fontFamily: 'sans-serif' }}>
-      <h1 style={{ textAlign: 'center' }}>Lista de Usuários 👥</h1>
-      
-      <StatusAPI carregando={carregando} erro={erro} quantidade={usuarios.length} />
-
-     
-      {!carregando && !erro && usuarios.length > 0 && (
-        <ul style={{ listStyle: 'none', padding: 0 }}>
-          {usuarios.map((usuario) => (
-            <li 
-              key={usuario.id} 
-              style={{ 
-                padding: '12px', 
-                margin: '8px 0', 
-                backgroundColor: '#f4f4f9', 
-                borderRadius: '6px',
-                borderLeft: '5px solid #646cff',
-                color: '#333'
-              }}
-            >
-              {usuario.name}
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
+    <ul>
+      {usuarios.map(usuario => (
+        <li key={usuario.id}>{usuario.name}</li>
+      ))}
+    </ul>
+  )
 }
 
-export default ListaUsuarios;
+export default Exercicio2
