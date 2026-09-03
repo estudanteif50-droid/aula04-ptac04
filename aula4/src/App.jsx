@@ -6,37 +6,44 @@ function App() {
   const [erro, setErro] = useState(null)
 
   useEffect(() => {
+    
+    const controller = new AbortController()
+    const { signal } = controller
+
     async function buscarUsuarios() {
       try {
-        // URL alterada de propósito para forçar o erro 404
-        const resposta = await fetch('https://typicode.com')
+        setCarregando(true)
+        setErro(null)
+
+        const resposta = await fetch('https://typicode.com', { signal })
         
         if (!resposta.ok) {
-          // Lança o erro se a resposta não for bem-sucedida
           throw new Error(`HTTP ${resposta.status}`)
         }
 
         const dados = await resposta.json()
         setUsuarios(dados.slice(0, 10))
       } catch (error) {
-        // Captura a mensagem e guarda no estado
-        setErro(error.message)
+        
+        if (error.name !== 'AbortError') {
+          setErro(error.message)
+        }
       } finally {
-        // Desliga a mensagem de carregando
-        setCarregando(false)
+        if (!signal.aborted) {
+          setCarregando(false)
+        }
       }
     }
 
     buscarUsuarios()
+
+   
+    return () => controller.abort()
   }, [])
 
-  // 1. Enquanto busca os dados, mostra isso:
   if (carregando) return <p>Carregando...</p>
-
-  // 2. Se der erro (que é o que vai acontecer), mostra isso:
   if (erro) return <p>Erro: {erro}</p>
 
-  // 3. Se tudo desse certo (sucesso), mostraria isso:
   return (
     <ul>
       {usuarios.map(usuario => (

@@ -3,12 +3,12 @@ import { useEffect, useState } from 'react'
 function Exercicio2() {
   const [usuarios, setUsuarios] = useState([])
   const [carregando, setCarregando] = useState(true)
-  const [erro, setErro] = useState(null) // Novo estado para erro
+  const [erro, setErro] = useState(null) 
 
   useEffect(() => {
     async function buscarUsuarios() {
       try {
-        // URL alterada de propósito para testar o erro 404
+       
         const resposta = await fetch('https://jsonplaceholder.typicode.com/usuariosenterrado')
         
         if (!resposta.ok) {
@@ -18,9 +18,9 @@ function Exercicio2() {
         const dados = await resposta.json()
         setUsuarios(dados.slice(0, 10))
       } catch (error) {
-        setErro(error.message) // Captura a mensagem de erro
+        setErro(error.message) 
       } finally {
-        setCarregando(false) // Sempre desliga no finally
+        setCarregando(false) 
       }
     }
 
