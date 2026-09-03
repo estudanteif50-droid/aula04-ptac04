@@ -1,73 +1,48 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 function App() {
   const [usuarios, setUsuarios] = useState([])
-  const [carregando, setCarregando] = useState(false)
+  const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState(null)
 
   useEffect(() => {
-    const controller = new AbortController()
-
-    async function carregarUsuarios() {
-      setCarregando(true)
-      setErro(null)
-
+    async function buscarUsuarios() {
       try {
-       
-        await new Promise((resolve) => setTimeout(resolve, 800))
+        // URL alterada de propósito para forçar o erro 404
+        const resposta = await fetch('https://typicode.com')
+        
+        if (!resposta.ok) {
+          // Lança o erro se a resposta não for bem-sucedida
+          throw new Error(`HTTP ${resposta.status}`)
+        }
 
-        const dadosSimulados = [
-          { id: 1, name: "Leanne Graham" },
-          { id: 2, name: "Ervin Howell" },
-          { id: 3, name: "Clementine Bauch" },
-          { id: 4, name: "Patricia Lebsack" },
-          { id: 5, name: "Chelsey Dietrich" },
-          { id: 6, name: "Mrs. Dennis Schulist" },
-          { id: 7, name: "Kurtis Weissnat" },
-          { id: 8, name: "Nicholas Runolfsdottir V" },
-          { id: 9, name: "Glenna Reichert" },
-          { id: 10, name: "Clementina DuBuque" }
-        ]
-
-        setUsuarios(dadosSimulados)
-      } catch (err) {
-        setErro(err.message)
+        const dados = await resposta.json()
+        setUsuarios(dados.slice(0, 10))
+      } catch (error) {
+        // Captura a mensagem e guarda no estado
+        setErro(error.message)
       } finally {
+        // Desliga a mensagem de carregando
         setCarregando(false)
       }
     }
 
-    carregarUsuarios()
-
-    return () => controller.abort()
+    buscarUsuarios()
   }, [])
 
+  // 1. Enquanto busca os dados, mostra isso:
+  if (carregando) return <p>Carregando...</p>
 
-  if (carregando) {
-    return <h2>Carregando...</h2>
-  }
+  // 2. Se der erro (que é o que vai acontecer), mostra isso:
+  if (erro) return <p>Erro: {erro}</p>
 
-  
-  if (erro) {
-    return <h2>Erro: {erro}</h2>
-  }
-
- 
-  if (usuarios.length === 0) {
-    return <h2>Nenhum usuário encontrado.</h2>
-  }
-
+  // 3. Se tudo desse certo (sucesso), mostraria isso:
   return (
-    <>
-      <h1>Lista de Usuários</h1>
-      <p>Sucesso: {usuarios.length} itens carregados.</p>
-      
-      <ul>
-        {usuarios.map((usuario) => (
-          <li key={usuario.id}>{usuario.name}</li>
-        ))}
-      </ul>
-    </>
+    <ul>
+      {usuarios.map(usuario => (
+        <li key={usuario.id}>{usuario.name}</li>
+      ))}
+    </ul>
   )
 }
 
