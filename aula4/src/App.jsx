@@ -6,43 +6,38 @@ function App() {
   const [erro, setErro] = useState(null)
 
   useEffect(() => {
-    
     const controller = new AbortController()
-    const { signal } = controller
 
     async function buscarUsuarios() {
       try {
         setCarregando(true)
         setErro(null)
 
-        const resposta = await fetch('https://typicode.com', { signal })
-        
-        if (!resposta.ok) {
-          throw new Error(`HTTP ${resposta.status}`)
-        }
+        await new Promise((resolve) => setTimeout(resolve, 600))
 
-        const dados = await resposta.json()
-        setUsuarios(dados.slice(0, 10))
-      } catch (error) {
+        const dados = [] 
         
+        setUsuarios(dados)
+      } catch (error) {
         if (error.name !== 'AbortError') {
           setErro(error.message)
         }
       } finally {
-        if (!signal.aborted) {
-          setCarregando(false)
-        }
+        setCarregando(false)
       }
     }
 
     buscarUsuarios()
 
-   
     return () => controller.abort()
   }, [])
 
   if (carregando) return <p>Carregando...</p>
   if (erro) return <p>Erro: {erro}</p>
+
+  if (usuarios.length === 0) {
+    return <p>Nenhum usuário encontrado.</p>
+  }
 
   return (
     <ul>
